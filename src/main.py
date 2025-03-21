@@ -86,7 +86,7 @@ async def cyclic_data(data, cycle_time=1, step=0.1, init=0, min=0, max=100):
     refresh = cycle_time / spi
     increasing = True
     while True:
-        await data.write_value(value)
+        await data.write_value(ua.Double(value))
         await asyncio.sleep(refresh)
         if value >= max:
             increasing = False
@@ -121,17 +121,20 @@ async def main():
     # populating our address space
     plc_server = await objects.add_object(idx, 'PLC Server')
 
-    bool_data = await plc_server.add_variable(idx, 'BooleanData', True, datatype=ua.NodeId(1, 0))
-    pos_data = await plc_server.add_variable(idx, 'PositiveTrendData', 0, datatype=ua.NodeId(11, 0))
-    neg_data = await plc_server.add_variable(idx, 'NegativeTrendData', 0, datatype=ua.NodeId(11, 0))
-    temp_data = await plc_server.add_variable(idx, 'TemperatureData', 18.5, datatype=ua.NodeId(11, 0))
-    hum_data = await plc_server.add_variable(idx, 'HumidityData', 60.2, datatype=ua.NodeId(11, 0))
-    cyc_data = await plc_server.add_variable(idx, 'CyclicData', 0, datatype=ua.NodeId(11, 0))
-    mirror_orig_data = await plc_server.add_variable(idx, 'MirrorDataOriginal', True, datatype=ua.NodeId(1, 0))
-    mirror_copy_data = await plc_server.add_variable(idx, 'MirrorDataCopy', True, datatype=ua.NodeId(1, 0))
-    latitude_data = await plc_server.add_variable(idx, "GPSLatitude", "", datatype=ua.NodeId(12, 0))
-    longitude_data = await plc_server.add_variable(idx, "GPSLongitude", "", datatype=ua.NodeId(12, 0))
-    latitude_longitude_data = await plc_server.add_variable(idx, "GPSLatitudeAndLongitude", "", datatype=ua.NodeId(12, 0))
+    bool_data = await plc_server.add_variable(idx, 'BooleanData', True, datatype=ua.NodeId(ua.ObjectIds.Boolean, 0))
+    pos_data = await plc_server.add_variable(idx, 'PositiveTrendData', 0, datatype=ua.NodeId(ua.ObjectIds.Double, 0))
+    neg_data = await plc_server.add_variable(idx, 'NegativeTrendData', 0, datatype=ua.NodeId(ua.ObjectIds.Double, 0))
+    temp_data = await plc_server.add_variable(idx, 'TemperatureData', 18.5, datatype=ua.NodeId(ua.ObjectIds.Double, 0))
+    hum_data = await plc_server.add_variable(idx, 'HumidityData', 60.2, datatype=ua.NodeId(ua.ObjectIds.Double, 0))
+    cyc_data = await plc_server.add_variable(idx, 'CyclicData', 0.0, datatype=ua.NodeId(ua.ObjectIds.Double, 0))
+    mirror_orig_data = await plc_server.add_variable(idx, 'MirrorDataOriginal', True, datatype=ua.NodeId(ua.ObjectIds.Boolean, 0))
+    mirror_copy_data = await plc_server.add_variable(idx, 'MirrorDataCopy', True, datatype=ua.NodeId(ua.ObjectIds.Boolean, 0))
+    latitude_data = await plc_server.add_variable(idx, "GPSLatitude", "", datatype=ua.NodeId(ua.ObjectIds.String, 0))
+    longitude_data = await plc_server.add_variable(idx, "GPSLongitude", "", datatype=ua.NodeId(ua.ObjectIds.String, 0))
+    latitude_longitude_data = await plc_server.add_variable(idx, "GPSLatitudeAndLongitude", "", datatype=ua.NodeId(ua.ObjectIds.String, 0))
+
+    # enable historization
+    await server.historize_node_data_change(cyc_data, period=None, count=10000)
 
     logger.info('Starting OPC UA server!')
 
