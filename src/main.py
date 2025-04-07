@@ -121,6 +121,8 @@ async def main():
     # populating our address space
     plc_server = await objects.add_object(idx, 'PLC Server')
 
+    coordinates = await plc_server.add_object(idx, 'Coordinates')
+
     bool_data = await plc_server.add_variable(idx, 'BooleanData', True, datatype=ua.NodeId(ua.ObjectIds.Boolean, 0))
     pos_data = await plc_server.add_variable(idx, 'PositiveTrendData', 0, datatype=ua.NodeId(ua.ObjectIds.Double, 0))
     neg_data = await plc_server.add_variable(idx, 'NegativeTrendData', 0, datatype=ua.NodeId(ua.ObjectIds.Double, 0))
@@ -129,12 +131,13 @@ async def main():
     cyc_data = await plc_server.add_variable(idx, 'CyclicData', 0.0, datatype=ua.NodeId(ua.ObjectIds.Double, 0))
     mirror_orig_data = await plc_server.add_variable(idx, 'MirrorDataOriginal', True, datatype=ua.NodeId(ua.ObjectIds.Boolean, 0))
     mirror_copy_data = await plc_server.add_variable(idx, 'MirrorDataCopy', True, datatype=ua.NodeId(ua.ObjectIds.Boolean, 0))
-    latitude_data = await plc_server.add_variable(idx, "GPSLatitude", "", datatype=ua.NodeId(ua.ObjectIds.String, 0))
-    longitude_data = await plc_server.add_variable(idx, "GPSLongitude", "", datatype=ua.NodeId(ua.ObjectIds.String, 0))
-    latitude_longitude_data = await plc_server.add_variable(idx, "GPSLatitudeAndLongitude", "", datatype=ua.NodeId(ua.ObjectIds.String, 0))
+    latitude_data = await coordinates.add_variable(idx, "GPSLatitude", "", datatype=ua.NodeId(ua.ObjectIds.String, 0))
+    longitude_data = await coordinates.add_variable(idx, "GPSLongitude", "", datatype=ua.NodeId(ua.ObjectIds.String, 0))
+    latitude_longitude_data = await coordinates.add_variable(idx, "GPSLatitudeAndLongitude", "", datatype=ua.NodeId(ua.ObjectIds.String, 0))
 
     # enable historization
     await server.historize_node_data_change(cyc_data, period=None, count=10000)
+    await server.historize_node_data_change(bool_data, period=None, count=10000)
 
     logger.info('Starting OPC UA server!')
 
